@@ -1,0 +1,28 @@
+{
+  "capabilities": [
+    {
+      "applicationName": "5200997961c79459",
+      "browserName": "android",
+      "deviceName": "5200997961c79459",
+      "version": "7.0",
+      "maxInstances": 1,
+      "maxSession": 1,
+      "platform": "Android"
+    }
+  ],
+  "configuration": {
+    "cleanUpCycle": 2000,
+    "timeout": 30000,
+    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
+    "url": "http://127.0.0.1:4444/wd/hub",
+    "maxSession": 6,
+    "port": "59290",
+    "bootstrap-port": "12552",
+    "host": "localhost",
+    "register": true,
+    "registerCycle": 5000,
+    "hubPort": "4444",
+    "hubHost": "localhost",
+    "session-override": true
+  }
+}

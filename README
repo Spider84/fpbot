@@ -1,0 +1,51 @@
+- android studio
+- sdk 8
+- ruby
+- appium
+- nodejs
+
+export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+export ANDROID_HOME="/code/android/sdk"
+export PATH=$PATH:"/code/android/sdk/platform-tools"
+export PATH=$PATH:"/code/android/sdk/tools"
+
+issue #1
+io.appium.uiautomator2.common.exceptions.NoSuchDriverException:
+
+decision
+adb uninstall io.appium.uiautomator2.server
+adb uninstall io.appium.uiautomator2.server.test
+abd unistall io.appium.unlock adb uninstall io.appium.settings
+
+issue #2
+Original error: Could not proxy command to the remote server. Original error: socket hang up
+
+decision
+https://stackoverflow.com/questions/54646837/could-not-proxy-command-to-remote-server-original-error-error-read-econnreset
+
+NOT NOW - по разному
+Create Facebook Account ViewGroup | View
+
+
+to factory settings
+https://www.verizon.com/support/knowledge-base-216579/
+
+install OS on android using ABD
+https://www.reliancedigital.in/solutionbox/how-to-run-a-new-android-os-on-your-dated-android-smartphone/
+
+1. enable USB debugging galaxy s9
+https://www.verizon.com/support/knowledge-base-216740/
+
+2. enable OEM bootlock
+
+
+
+adb devices
+adb check ip addreses
+adb tcpip for each device
+adb connect each devices
+run grid jar
+run appium with nodeconfig for each device
+delete permissions
+
+

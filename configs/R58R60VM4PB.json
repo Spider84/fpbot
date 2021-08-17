@@ -1,0 +1,28 @@
+{
+  "capabilities": [
+    {
+      "applicationName": "R58R60VM4PB",
+      "browserName": "android",
+      "deviceName": "R58R60VM4PB",
+      "version": "7.0",
+      "maxInstances": 1,
+      "maxSession": 1,
+      "platform": "Android"
+    }
+  ],
+  "configuration": {
+    "cleanUpCycle": 2000,
+    "timeout": 30000,
+    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
+    "url": "http://127.0.0.1:4444/wd/hub",
+    "maxSession": 6,
+    "port": "52339",
+    "bootstrap-port": "19419",
+    "host": "localhost",
+    "register": true,
+    "registerCycle": 5000,
+    "hubPort": "4444",
+    "hubHost": "localhost",
+    "session-override": true
+  }
+}
