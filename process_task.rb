@@ -68,6 +68,8 @@ adb.devices.each do |device|
 end
 ThreadsWait.all_waits(*threads)
 
+system("iptables -t nat -F WIFI_PROXY")
+
 total = 0
 prepare_logger.debug "Waiting for #{adb.devices.count} nodes to register"
 20.times do
@@ -97,7 +99,7 @@ adb.devices.each do |device|
       api_response = JSON.parse(Faraday.get(url).body)
       logger = Farmpage::Logger.new(api_response['task'], device)
       logger.noise api_response.inspect
-      processor = Farmpage::Processor.new(api_response, logger, device.udid, device.ip, device.port, device.appium_port)
+      processor = Farmpage::Processor.new(api_response, logger, device.udid, device.ip, device.port, device.appium_port, cnt)
       processor.process!
     rescue NoMethodError => exception
       logger.critical exception

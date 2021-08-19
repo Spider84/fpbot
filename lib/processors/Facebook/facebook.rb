@@ -4,7 +4,7 @@ require 'selenium-webdriver'
 module Farmpage
   class Facebook
 
-    def initialize(task, avd, proxy, logger, device_id, host, port, appium_port)
+    def initialize(task, avd, proxy, logger, device_id, host, port, appium_port, task_num)
       @logger = logger
       @task = task
       @apk_file = task['apk']
@@ -16,6 +16,7 @@ module Farmpage
       @port = port
       @avd = avd
       @appium_port = appium_port
+      @task_num = task_num
       @logger.debug "Initializing device"
       @capabilities = {
         caps: {
@@ -60,6 +61,91 @@ module Farmpage
       else
         @logger.debug "Application Installed. Proceeding"
       end
+
+      device_mac = nil
+
+      @logger.debug "Trying to detect device MAC for interface `#{host}`..."
+      IO.popen("ip addr") {|nkf_io|
+        ip_addr = nkf_io.read
+        addr = ether = nil
+        ip_addr.each_line do |line|
+          m = line.match /^\s*\d+\:\s+(\w+)\:\s+/
+          if m
+            addr = ether = nil
+            next
+          end
+          m = line.match /^\s+inet\s+((?:[0-9]{1,3}\.){3}[0-9]{1,3})/
+          if m
+            addr = m[1]
+            next
+          end
+          m = line.match /^\s+link\/ether\s+((?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2}))/
+          if m
+            ether = m[1]
+            next
+          end
+          if addr!=nil && ether!=nil
+            if host.eql?(addr)
+              @logger.debug "Detected device MAC `#{ether}`"
+              device_mac = ether
+              break
+            end
+            addr = ether = nil
+          end
+        end
+      }
+
+      if device_mac != nil
+        proxy_local_port = 10000 + @task_num
+        new_config = %{
+redsocks {
+      /* `local_ip' defaults to 127.0.0.1 for security reasons,
+      * use 0.0.0.0 if you want to listen on every interface.
+      * `local_*' are used as port to redirect to.
+      */
+      local_ip = 10.0.0.1;
+      local_port = #{proxy_local_port};
+
+      // listen() queue length. Default value is SOMAXCONN and it should be
+      // good enough for most of us.
+      // listenq = 128; // SOMAXCONN equals 128 on my Linux box.
+
+      // Enable or disable faster data pump based on splice(2) syscall.
+      // Default value depends on your kernel version, true for 2.6.27.13+
+      // splice = false;
+
+      // `ip' and `port' are IP and tcp-port of proxy-server
+      // You can also use hostname instead of IP, only one (random)
+      // address of multihomed host will be used.
+      ip = #{task['proxy']['host']};
+      port = #{task['proxy']['port']};
+
+      // known types: socks4, socks5, http-connect, http-relay
+      type = socks5;
+
+      login = "#{task['proxy']['login']}";
+      password = "#{task['proxy']['password']}";
+
+      // known ways to disclose client IP to the proxy:
+      //  false -- disclose nothing
+      // http-connect supports:
+      //  X-Forwarded-For  -- X-Forwarded-For: IP
+      //  Forwarded_ip     -- Forwarded: for=IP # see RFC7239
+      //  Forwarded_ipport -- Forwarded: for="IP:port" # see RFC7239
+      // disclose_src = false;
+
+      // various ways to handle proxy failure
+      //  close -- just close connection (default)
+      //  forward_http_err -- forward HTTP error page from proxy as-is
+      on_proxy_fail = close;
+}
+        }
+        writer = Fifo.new('/var/run/redsocks.socket', :w, :nowait)
+        writer.puts new_config
+
+        system("iptables -t nat -A WIFI_PROXY -p tcp -s #{host} -m mac --mac-source #{device_mac} -j REDIRECT --to-ports #{proxy_local_port}")
+      end
+      
       system("adb -s #{@device_id} shell pm grant com.facebook.katana android.permission.WRITE_CONTACTS")
       system("adb -s #{@device_id} shell pm grant com.facebook.katana android.permission.READ_CONTACTS")
       system("adb -s #{@device_id} shell pm grant com.facebook.katana android.permission.READ_PHONE_STATE")
